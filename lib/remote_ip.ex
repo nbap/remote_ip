@@ -81,7 +81,7 @@ defmodule RemoteIp do
   GitHub.
   """
 
-  require Logger
+  import RemoteIp.LoggerWrapper, only: [log: 2]
 
   @behaviour Plug
 
@@ -171,9 +171,9 @@ defmodule RemoteIp do
   end
 
   defp last_forwarded_ip(req_headers, config) do
-    Logger.debug(fn -> start(config) end)
+    log(&start/1, config)
     ip = req_headers |> ips_given(config) |> most_recent_client_given(config)
-    Logger.debug(fn -> stop(ip) end)
+    log(&stop/1, ip)
     ip
   end
 
@@ -188,15 +188,15 @@ defmodule RemoteIp do
   defp client?(ip, %RemoteIp.Config{clients: clients, proxies: proxies}) do
     cond do
       clients |> contains?(ip) ->
-        Logger.debug(fn -> known_client(ip) end)
+        log(&known_client/1, ip)
         true
 
       proxies |> contains?(ip) ->
-        Logger.debug(fn -> known_proxy(ip) end)
+        log(&known_proxy/1, ip)
         false
 
       true ->
-        Logger.debug(fn -> presumably_client(ip) end)
+        log(&presumably_client/1, ip)
         true
     end
   end

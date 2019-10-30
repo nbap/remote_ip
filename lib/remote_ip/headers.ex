@@ -3,7 +3,7 @@ defmodule RemoteIp.Headers do
   Entry point for parsing any type of forwarding header.
   """
 
-  require Logger
+  import RemoteIp.LoggerWrapper, only: [log: 2]
 
   @doc  """
   Selects the appropriate headers and parses IPs out of them.
@@ -27,15 +27,15 @@ defmodule RemoteIp.Headers do
   @spec parse([header], allowed) :: [ip]
 
   def parse(headers, %MapSet{} = allowed) when is_list(headers) do
-    Logger.debug(fn -> parsing(headers) end)
+    log(&parsing/1, headers)
     ips = headers |> allow(allowed) |> parse_each
-    Logger.debug(fn -> parsed(ips) end)
+    log(&parsed/1, ips)
     ips
   end
 
   defp allow(headers, allowed) do
     filtered = Enum.filter(headers, &allow?(&1, allowed))
-    Logger.debug(fn -> considering(filtered) end)
+    log(&considering/1, filtered)
     filtered
   end
 
